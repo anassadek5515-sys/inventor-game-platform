@@ -13,38 +13,63 @@ const SYSTEM_PROMPT = `
 - player (object: controller, spawn_zone, inventory_slots)
 `;
 
+async function getKeyModels(apiKey) {
+  const res = await fetch("https://api.groq.com/openai/v1/models", {
+    headers: { Authorization: `Bearer ${apiKey}` }
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`تعذر فحص النماذج المتاحة للمفتاح (${res.status}): ${err}`);
+  }
+
+  const data = await res.json();
+  const ids = Array.isArray(data?.data) ? data.data.map((m) => m.id).filter(Boolean) : [];
+  if (!ids.length) {
+    throw new Error("المفتاح شغال لكن لا توجد نماذج متاحة له.");
+  }
+
+  return ids;
+}
+
 export async function buildWorldSpec(promptText, apiKey = process.env.GROQ_API_KEY) {
   if (!apiKey) {
     throw new Error("GROQ_API_KEY غير موجود. تأكد من إضافته في GitHub Secrets.");
   }
 
-  const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${apiKey}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: "llama-3.3-70b-versatile",
-      temperature: 0.2,
-      response_format: { type: "json_object" },
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: promptText }
-      ]
-    })
-  });
+  const candidates = await getKeyModels(apiKey);
+  let lastError = "";
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`خطأ من Groq (${res.status}): ${err}`);
+  for (const model of candidates) {
+    const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        response_format: { type: "json_object" },
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: promptText }
+        ]
+      })
+    });
+
+    if (res.ok) {
+      console.log("تم التوليد بنجاح عبر الموديل:", model);
+      const data = await res.json();
+      const content = data?.choices?.[0]?.message?.content;
+      if (!content) throw new Error("لم يتم استلام محتوى من Groq.");
+      return JSON.parse(content);
+    }
+
+    lastError = `[${model} -> ${res.status}]: ${await res.text()}`;
   }
 
-  const data = await res.json();
-  const content = data?.choices?.[0]?.message?.content;
-  if (!content) throw new Error("لم يتم استلام محتوى من Groq.");
-
-  return JSON.parse(content);
+  throw new Error(`لم ينجح أي نموذج متاح للمفتاح. آخر خطأ: ${lastError}`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
