@@ -1,3 +1,40 @@
+name: Build Godot Game
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate Godot project from world_spec.json
+        run: node build_godot_scene.mjs
+
+      - name: Install Godot 4.3 & Export Templates
+        run: |
+          GODOT_VER="4.3-stable"
+          ZIP_NAME="Godot_v${GODOT_VER}_linux.x86_64.zip"
+          TPZ_NAME="Godot_v${GODOT_VER}_export_templates.tpz"
+
+          curl -fsSL "https://github.com/godotengine/godot/releases/download/${GODOT_VER}/${ZIP_NAME}" -o godot.zip
+          unzip -q godot.zip
+          mv "Godot_v${GODOT_VER}_linux.x86_64" /usr/local/bin/godot
+          chmod +x /usr/local/bin/godot
+
+          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+          curl -fsSL "https://github.com/godotengine/godot/releases/download/${GODOT_VER}/${TPZ_NAME}" -o templates.tpz
+          unzip -q templates.tpz -d tmp_templates
+          mv tmp_templates/templates/* "$HOME/.local/share/godot/export_templates/4.3.stable/"
+          rm -rf godot.zip templates.tpz tmp_templates
+
       - name: Configure export presets for Windows & Linux
         run: |
           cat << 'EOF' > game_project/export_presets.cfg
@@ -39,3 +76,17 @@
 
           [preset.1.options]
           EOF
+
+      - name: Export Game Builds
+        run: |
+          mkdir -p game_project/build/windows game_project/build/linux
+          godot --headless --path game_project --export-release "Windows Desktop" build/windows/game.exe
+          godot --headless --path game_project --export-release "Linux/X11" build/linux/game.x86_64
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: godot-game-builds
+          path: |
+            game_project/build/windows/*
+            game_project/build/linux/*
