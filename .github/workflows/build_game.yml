@@ -18,24 +18,42 @@ jobs:
       - name: Generate Godot project from world_spec.json
         run: node build_godot_scene.mjs
 
-      - name: Install Godot 4.3 & Export Templates
+      - name: Cache Godot 4.3 Engine & Export Templates
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/bin/godot
+            ~/.local/share/godot/export_templates/4.3.stable
+          key: godot-4.3-stable-linux-templates-v1
+
+      - name: Install Godot 4.3 & Export Templates (if not cached)
         run: |
-          GODOT_VER="4.3-stable"
-          ZIP_NAME="Godot_v${GODOT_VER}_linux.x86_64.zip"
-          TPZ_NAME="Godot_v${GODOT_VER}_export_templates.tpz"
+          if [ ! -x /usr/local/bin/godot ] || [ ! -d "$HOME/.local/share/godot/export_templates/4.3.stable" ]; then
+            GODOT_VER="4.3-stable"
+            ZIP_NAME="Godot_v${GODOT_VER}_linux.x86_64.zip"
+            TPZ_NAME="Godot_v${GODOT_VER}_export_templates.tpz"
 
-          curl -fsSL "https://github.com/godotengine/godot/releases/download/${GODOT_VER}/${ZIP_NAME}" -o godot.zip
-          unzip -q godot.zip
-          mv "Godot_v${GODOT_VER}_linux.x86_64" /usr/local/bin/godot
-          chmod +x /usr/local/bin/godot
+            curl -fsSL "https://github.com/godotengine/godot/releases/download/${GODOT_VER}/${ZIP_NAME}" -o godot.zip
+            unzip -q godot.zip
+            mv "Godot_v${GODOT_VER}_linux.x86_64" /usr/local/bin/godot
+            chmod +x /usr/local/bin/godot
 
-          mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
-          curl -fsSL "https://github.com/godotengine/godot/releases/download/${GODOT_VER}/${TPZ_NAME}" -o templates.tpz
-          unzip -q templates.tpz -d tmp_templates
-          mv tmp_templates/templates/* "$HOME/.local/share/godot/export_templates/4.3.stable/"
-          rm -rf godot.zip templates.tpz tmp_templates
+            mkdir -p "$HOME/.local/share/godot/export_templates/4.3.stable"
+            curl -fsSL "https://github.com/godotengine/godot/releases/download/${GODOT_VER}/${TPZ_NAME}" -o templates.tpz
+            unzip -q templates.tpz -d tmp_templates
+            mv tmp_templates/templates/* "$HOME/.local/share/godot/export_templates/4.3.stable/"
+            rm -rf godot.zip templates.tpz tmp_templates
+          fi
 
-      - name: Configure export presets for Windows & Linux
+      - name: Prepare Android Keystore
+        run: |
+          mkdir -p game_project/android
+          keytool -genkeypair -v -keystore game_project/android/debug.keystore \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+            -storepass android -keypass android \
+            -dname "CN=Android Debug,O=Android,C=US"
+
+      - name: Configure export presets for Windows, Linux & Android
         run: |
           cat << 'EOF' > game_project/export_presets.cfg
           [preset.0]
@@ -75,13 +93,37 @@ jobs:
           encrypt_directory=false
 
           [preset.1.options]
+
+          [preset.2]
+
+          name="Android"
+          platform="Android"
+          runnable=true
+          dedicated_server=false
+          custom_features=""
+          export_filter="all_resources"
+          include_filter=""
+          exclude_filter=""
+          export_path="build/android/game.apk"
+          encryption_include_filters=""
+          encryption_exclude_filters=""
+          encrypt_pck=false
+          encrypt_directory=false
+
+          [preset.2.options]
+
+          keystore/debug="android/debug.keystore"
+          keystore/debug_user="androiddebugkey"
+          keystore/debug_password="android"
+          package/unique_name="com.omnihorror.engine"
           EOF
 
       - name: Export Game Builds
         run: |
-          mkdir -p game_project/build/windows game_project/build/linux
+          mkdir -p game_project/build/windows game_project/build/linux game_project/build/android
           godot --headless --path game_project --export-release "Windows Desktop" build/windows/game.exe
           godot --headless --path game_project --export-release "Linux/X11" build/linux/game.x86_64
+          godot --headless --path game_project --export-release "Android" build/android/game.apk || echo "Android export skipped if SDK/Gradle not present"
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
@@ -90,3 +132,4 @@ jobs:
           path: |
             game_project/build/windows/*
             game_project/build/linux/*
+            game_project/build/android/*
