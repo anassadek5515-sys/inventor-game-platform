@@ -37,20 +37,52 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 
+[input_devices]
+
+pointing/emulate_touch_from_mouse=true
+
 [rendering]
 
 anti_aliasing/quality/msaa_3d=1
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=1
-environment/defaults/default_clear_color=Color(0.05, 0.06, 0.08, 1)
+environment/defaults/default_clear_color=Color(0.04, 0.05, 0.07, 1)
+`;
+}
+
+function buildScreenCurveShader() {
+  return `shader_type canvas_item;
+
+uniform sampler2D screen_tex : hint_screen_texture, filter_linear_mipmap;
+uniform float curve_strength : hint_range(0.0, 0.35) = 0.12;
+uniform float vignette_strength : hint_range(0.0, 1.0) = 0.45;
+
+vec2 warp_uv(vec2 uv) {
+	vec2 centered = uv * 2.0 - 1.0;
+	vec2 offset = centered.yx * curve_strength;
+	centered = centered + centered * (offset * offset);
+	return centered * 0.5 + 0.5;
+}
+
+void fragment() {
+	vec2 warped_uv = warp_uv(SCREEN_UV);
+	if (warped_uv.x < 0.0 || warped_uv.x > 1.0 || warped_uv.y < 0.0 || warped_uv.y > 1.0) {
+		COLOR = vec4(0.01, 0.01, 0.015, 1.0);
+	} else {
+		vec3 col = texture(screen_tex, warped_uv).rgb;
+		float dist = length(warped_uv - vec2(0.5));
+		float vig = clamp(1.0 - dist * vignette_strength * 1.35, 0.2, 1.0);
+		COLOR = vec4(col * vig, 1.0);
+	}
+}
 `;
 }
 
 function buildMainScene(spec) {
   const ambientColor = hexToGodotColor(spec?.atmosphere?.ambient_light?.color || "#141820");
-  const ambientEnergy = Number(spec?.atmosphere?.ambient_light?.intensity ?? 0.3);
+  const ambientEnergy = Number(spec?.atmosphere?.ambient_light?.intensity ?? 0.25);
   const fogEnabled = Boolean(spec?.atmosphere?.fog?.enabled ?? true);
   const fogColor = hexToGodotColor(spec?.atmosphere?.fog?.color || "#1b222c");
-  const fogDensity = Number(spec?.atmosphere?.fog?.density ?? 0.04);
+  const fogDensity = Number(spec?.atmosphere?.fog?.density ?? 0.045);
   const zones = Array.isArray(spec?.zones) && spec.zones.length > 0
     ? spec.zones
     : [{ id: "zone_01", type: "corridor", grid_snap: 2.0 }];
@@ -71,27 +103,32 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, ${zPos})
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.25, 0)
 use_collision = true
 size = Vector3(${width}, 0.5, ${length})
+material = SubResource("Mat_Floor")
 
 [node name="LeftWall" type="CSGBox3D" parent="World/${safeName}"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, ${-(width / 2)}, 2.0, 0)
 use_collision = true
 size = Vector3(0.4, 4.0, ${length})
+material = SubResource("Mat_Wall")
 
 [node name="RightWall" type="CSGBox3D" parent="World/${safeName}"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, ${width / 2}, 2.0, 0)
 use_collision = true
 size = Vector3(0.4, 4.0, ${length})
+material = SubResource("Mat_Wall")
 
 [node name="Ceiling" type="CSGBox3D" parent="World/${safeName}"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 4.1, 0)
 use_collision = true
 size = Vector3(${width + 0.8}, 0.3, ${length})
+material = SubResource("Mat_Ceiling")
 `;
   });
 
-  return `[gd_scene load_steps=4 format=3]
+  return `[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://game_controller.gd" id="1_ctrl"]
+[ext_resource type="Shader" path="res://screen_curve.gdshader" id="2_shd"]
 
 [sub_resource type="Environment" id="Environment_1"]
 background_mode = 1
@@ -107,6 +144,26 @@ fog_density = ${fogDensity}
 radius = 0.45
 height = 1.8
 
+[sub_resource type="StandardMaterial3D" id="Mat_Floor"]
+albedo_color = Color(0.14, 0.16, 0.19, 1)
+metallic = 0.25
+roughness = 0.42
+
+[sub_resource type="StandardMaterial3D" id="Mat_Wall"]
+albedo_color = Color(0.22, 0.24, 0.27, 1)
+metallic = 0.15
+roughness = 0.78
+
+[sub_resource type="StandardMaterial3D" id="Mat_Ceiling"]
+albedo_color = Color(0.09, 0.1, 0.12, 1)
+metallic = 0.1
+roughness = 0.88
+
+[sub_resource type="ShaderMaterial" id="Mat_ScreenCurve"]
+shader = ExtResource("2_shd")
+shader_parameter/curve_strength = 0.12
+shader_parameter/vignette_strength = 0.45
+
 [node name="Main" type="Node3D"]
 script = ExtResource("1_ctrl")
 
@@ -115,7 +172,7 @@ environment = SubResource("Environment_1")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(0.866, -0.25, 0.433, 0, 0.866, 0.5, -0.5, -0.433, 0.75, 0, 8, 0)
-light_energy = 0.35
+light_energy = 0.25
 shadow_enabled = true
 
 [node name="World" type="Node3D" parent="."]
@@ -134,10 +191,60 @@ current = true
 fov = 75.0
 
 [node name="Flashlight" type="SpotLight3D" parent="Player/Head"]
-light_energy = 3.5
-spot_range = 18.0
-spot_angle = 32.0
+light_energy = 4.2
+spot_range = 20.0
+spot_angle = 34.0
 shadow_enabled = true
+
+[node name="ScreenFXLayer" type="CanvasLayer" parent="."]
+layer = 10
+
+[node name="CurveOverlay" type="ColorRect" parent="ScreenFXLayer"]
+material = SubResource("Mat_ScreenCurve")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="TouchUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="BtnUp" type="Button" parent="TouchUI"]
+offset_left = 100.0
+offset_top = 470.0
+offset_right = 180.0
+offset_bottom = 540.0
+text = "W"
+
+[node name="BtnDown" type="Button" parent="TouchUI"]
+offset_left = 100.0
+offset_top = 610.0
+offset_right = 180.0
+offset_bottom = 680.0
+text = "S"
+
+[node name="BtnLeft" type="Button" parent="TouchUI"]
+offset_left = 20.0
+offset_top = 540.0
+offset_right = 100.0
+offset_bottom = 610.0
+text = "A"
+
+[node name="BtnRight" type="Button" parent="TouchUI"]
+offset_left = 180.0
+offset_top = 540.0
+offset_right = 260.0
+offset_bottom = 610.0
+text = "D"
+
+[node name="BtnLight" type="Button" parent="TouchUI"]
+offset_left = 1060.0
+offset_top = 580.0
+offset_right = 1240.0
+offset_bottom = 660.0
+text = "Flashlight (F)"
 `;
 }
 
@@ -151,21 +258,48 @@ function buildGameController(spec) {
 @onready var player: CharacterBody3D = $Player
 @onready var head: Node3D = $Player/Head
 @onready var flashlight: SpotLight3D = $Player/Head/Flashlight
+@onready var btn_up: Button = $TouchUI/BtnUp
+@onready var btn_down: Button = $TouchUI/BtnDown
+@onready var btn_left: Button = $TouchUI/BtnLeft
+@onready var btn_right: Button = $TouchUI/BtnRight
+@onready var btn_light: Button = $TouchUI/BtnLight
 
 var game_state: String = "${initialState}"
 var move_speed: float = 5.0
+var look_sensitivity: float = 0.004
 var battery_level: float = 100.0
 var inventory_slots: int = ${inventorySlots}
 var zones_count: int = ${zonesCount}
 
+var hold_up: bool = false
+var hold_down: bool = false
+var hold_left: bool = false
+var hold_right: bool = false
+var is_dragging_look: bool = false
+
 func _ready() -> void:
 	game_state = "gameplay"
-	print("Game started | State: ", game_state, " | Zones: ", zones_count, " | Slots: ", inventory_slots)
+	btn_up.button_down.connect(func(): hold_up = true)
+	btn_up.button_up.connect(func(): hold_up = false)
+	btn_down.button_down.connect(func(): hold_down = true)
+	btn_down.button_up.connect(func(): hold_down = false)
+	btn_left.button_down.connect(func(): hold_left = true)
+	btn_left.button_up.connect(func(): hold_left = false)
+	btn_right.button_down.connect(func(): hold_right = true)
+	btn_right.button_up.connect(func(): hold_right = false)
+	btn_light.pressed.connect(toggle_flashlight)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_F:
 			toggle_flashlight()
+	elif event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT or event.button_index == MOUSE_BUTTON_RIGHT:
+			is_dragging_look = event.pressed
+	elif event is InputEventMouseMotion and is_dragging_look:
+		player.rotate_y(-event.relative.x * look_sensitivity)
+		head.rotate_x(-event.relative.y * look_sensitivity)
+		head.rotation.x = clamp(head.rotation.x, deg_to_rad(-75.0), deg_to_rad(75.0))
 
 func toggle_flashlight() -> void:
 	if flashlight and battery_level > 0.0:
@@ -176,11 +310,23 @@ func _physics_process(delta: float) -> void:
 		return
 
 	if flashlight and flashlight.visible and battery_level > 0.0:
-		battery_level = max(0.0, battery_level - delta * 0.8)
+		battery_level = max(0.0, battery_level - delta * 0.7)
 		if battery_level <= 0.0:
 			flashlight.visible = false
 
 	var input_dir := Input.get_vector("ui_left", "ui_right", "ui_up", "ui_down")
+	if hold_left:
+		input_dir.x -= 1.0
+	if hold_right:
+		input_dir.x += 1.0
+	if hold_up:
+		input_dir.y -= 1.0
+	if hold_down:
+		input_dir.y += 1.0
+
+	if input_dir.length() > 1.0:
+		input_dir = input_dir.normalized()
+
 	var direction := (player.transform.basis * Vector3(input_dir.x, 0.0, input_dir.y)).normalized()
 
 	if direction != Vector3.ZERO:
@@ -209,10 +355,11 @@ function main() {
 
   ensureDir(OUT_DIR);
   fs.writeFileSync(path.join(OUT_DIR, "project.godot"), buildProjectGodot(spec.project_name), "utf8");
+  fs.writeFileSync(path.join(OUT_DIR, "screen_curve.gdshader"), buildScreenCurveShader(), "utf8");
   fs.writeFileSync(path.join(OUT_DIR, "main.tscn"), buildMainScene(spec), "utf8");
   fs.writeFileSync(path.join(OUT_DIR, "game_controller.gd"), buildGameController(spec), "utf8");
 
-  console.log("تم توليد مشروع Godot بنجاح في مجلد:", OUT_DIR);
+  console.log("تم توليد مشروع Godot مع الخامات، أزرار اللمس، وعوجة الشاشة بنجاح.");
 }
 
 main();
