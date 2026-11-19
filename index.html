@@ -148,6 +148,12 @@
       gap: 12px;
     }
 
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 12px;
+    }
+
     label {
       display: block;
       font-size: 0.85rem;
@@ -232,6 +238,11 @@
       gap: 6px;
     }
 
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     .btn-primary { background: var(--accent); color: #05111a; }
     .btn-success { background: var(--accent-2); color: #05160b; }
     .btn-warn { background: var(--warn); color: #1a1002; }
@@ -268,7 +279,6 @@
       text-align: left;
     }
 
-    /* Feature Matrix Styles */
     .matrix-controls {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -334,7 +344,6 @@
       white-space: nowrap;
     }
 
-    /* Simulator / Live Preview */
     .sim-stage-wrap {
       position: relative;
       border-radius: 16px;
@@ -683,37 +692,41 @@
     <!-- TAB 4: GITHUB ACTIONS & DEPLOYMENT -->
     <section class="tab-panel" id="tab-cicd">
       <div class="card">
-        <h2>تشغيل GitHub Actions مباشرة وتوليد أوامر التشغيل</h2>
-        <div class="grid-3">
+        <h2>توليد اللعبة عبر GitHub Actions مباشرة وتوليد أوامر التشغيل</h2>
+        <div class="grid-4">
           <div>
             <label for="ghOwner">اسم المستخدم / المنظمة (GitHub Owner)</label>
-            <input id="ghOwner" type="text" placeholder="username" />
+            <input id="ghOwner" type="text" placeholder="anassadeK5515-sys" />
           </div>
           <div>
             <label for="ghRepo">اسم المستودع (GitHub Repo)</label>
-            <input id="ghRepo" type="text" placeholder="godot-horror-platform" />
+            <input id="ghRepo" type="text" placeholder="inventor-game-platform" />
           </div>
           <div>
             <label for="ghWorkflow">اسم ملف الـ Workflow</label>
             <input id="ghWorkflow" type="text" value="build_game.yml" />
           </div>
+          <div>
+            <label for="ghBranch">الفرع (Branch)</label>
+            <input id="ghBranch" type="text" value="main" />
+          </div>
         </div>
 
         <div style="margin-top: 12px;">
-          <label for="ghToken">GitHub Fine-Grained Token (صلاحية Actions: Read & Write — يُستخدم لتشغيل Workflow مباشرة)</label>
+          <label for="ghToken">GitHub Fine-Grained Token (صلاحية Actions: Read & Write)</label>
           <input id="ghToken" type="password" placeholder="github_pat_..." />
         </div>
 
         <div class="actions">
-          <button class="btn-success" id="btnTriggerWorkflow">تشغيل Workflow الآن عبر API</button>
+          <button class="btn-success" id="btnTriggerWorkflow">توليد اللعبة الآن عبر GitHub Actions</button>
           <a class="btn btn-primary" id="btnDirectActionsUrl" href="https://github.com" target="_blank" rel="noopener">فتح صفحة Actions في GitHub</a>
           <button class="btn-secondary" id="btnCopyCli">نسخ أمر GitHub CLI</button>
         </div>
-        <div class="status-bar" id="cicdStatus">أدخل Owner و Repo لتفعيل الروابط والأوامر، أو أضف Token لتشغيل البناء مباشرة من هنا.</div>
+        <div class="status-bar" id="cicdStatus">أدخل Owner و Repo واسم ملف الـ Workflow والـ Token لتوليد اللعبة مباشرة.</div>
       </div>
 
       <div class="card">
-        <h2>أمر التشغيل السريع (GitHub CLI / curl)</h2>
+        <h2>أمر التشغيل السريع (GitHub CLI)</h2>
         <div class="code-box" id="cliCommandBox"></div>
       </div>
     </section>
@@ -861,10 +874,8 @@
       }
     };
 
-    // Elements
     const el = (id) => document.getElementById(id);
 
-    // Tabs
     document.querySelectorAll(".tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
         document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
@@ -990,7 +1001,6 @@
       applySimVisuals();
     }
 
-    // Matrix rendering
     const engineFilterEl = el("engineFilter");
     ENGINES.forEach((e) => {
       const opt = document.createElement("option");
@@ -1044,7 +1054,6 @@
       el("matrixSummary").textContent = `المعروض حالياً: ${shownCount} من أصل 1000 ميزة.`;
     }
 
-    // Simulator
     let simMode = "AUTO";
     let simBat = 100;
     let simStam = 100;
@@ -1115,11 +1124,11 @@
       b.addEventListener("click", () => moveSim(b.dataset.move));
     });
 
-    // GitHub Actions & CLI
     function updateCiCdBox(spec) {
       const owner = el("ghOwner").value.trim() || "<OWNER>";
       const repo = el("ghRepo").value.trim() || "<REPO>";
       const wf = el("ghWorkflow").value.trim() || "build_game.yml";
+      const branch = el("ghBranch").value.trim() || "main";
       const preset = el("scenarioPreset").value;
       const curve = el("curveStrength").value;
       const buildAndroid = el("platAndroid").checked ? "true" : "false";
@@ -1131,7 +1140,7 @@
           : "https://github.com";
 
       el("cliCommandBox").textContent =
-`gh workflow run ${wf} --repo ${owner}/${repo} \\
+`gh workflow run ${wf} --repo ${owner}/${repo} --ref ${branch} \\
   -f scenario_preset="${preset === "custom_sector" ? "dark_lab" : preset}" \\
   -f game_prompt="${promptClean}" \\
   -f screen_curve="${curve}" \\
@@ -1142,10 +1151,11 @@
       const owner = el("ghOwner").value.trim();
       const repo = el("ghRepo").value.trim();
       const wf = el("ghWorkflow").value.trim() || "build_game.yml";
+      const branch = el("ghBranch").value.trim() || "main";
       const token = el("ghToken").value.trim();
 
       if (!owner || !repo || !token) {
-        el("cicdStatus").textContent = "يرجى إدخال GitHub Owner و Repo و Token لتشغيل Workflow مباشرة.";
+        el("cicdStatus").textContent = "يرجى إدخال GitHub Owner و Repo و Token لتوليد اللعبة مباشرة.";
         return;
       }
 
@@ -1157,7 +1167,9 @@
         build_android: el("platAndroid").checked ? "true" : "false"
       };
 
-      el("cicdStatus").textContent = "جاري إرسال أمر التشغيل إلى GitHub Actions...";
+      const btn = el("btnTriggerWorkflow");
+      btn.disabled = true;
+      el("cicdStatus").textContent = "جاري إرسال أمر توليد اللعبة إلى GitHub Actions...";
 
       try {
         const res = await fetch(
@@ -1167,24 +1179,26 @@
             headers: {
               "Authorization": `Bearer ${token}`,
               "Accept": "application/vnd.github+json",
+              "X-GitHub-Api-Version": "2022-11-28",
               "Content-Type": "application/json"
             },
-            body: JSON.stringify({ ref: "main", inputs })
+            body: JSON.stringify({ ref: branch, inputs })
           }
         );
 
         if (res.status === 204) {
-          el("cicdStatus").textContent = "تم تشغيل Workflow بنجاح! راقب التقدم من صفحة GitHub Actions.";
+          el("cicdStatus").textContent = "تم إرسال أمر توليد اللعبة بنجاح! افتح صفحة Actions في GitHub لمتابعة البناء وتحميل Artifacts.";
         } else {
-          const errText = await res.text();
-          el("cicdStatus").textContent = `تعذر التشغيل (${res.status}): ${errText}`;
+          const errData = await res.json().catch(() => ({}));
+          el("cicdStatus").textContent = `تعذر التشغيل (${res.status}): ${errData.message || "تحقق من اسم الملف، الفرع، وصلاحيات التوكن (Actions: Read & Write)"}`;
         }
       } catch (err) {
         el("cicdStatus").textContent = `خطأ في الاتصال بـ GitHub API: ${err.message}`;
+      } finally {
+        btn.disabled = false;
       }
     });
 
-    // Save / Copy / Download / Reset
     function saveState() {
       const state = {
         projectName: el("projectName").value,
@@ -1209,7 +1223,8 @@
         platAndroid: el("platAndroid").checked,
         ghOwner: el("ghOwner").value,
         ghRepo: el("ghRepo").value,
-        ghWorkflow: el("ghWorkflow").value
+        ghWorkflow: el("ghWorkflow").value,
+        ghBranch: el("ghBranch").value
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       el("builderStatus").textContent = "تم حفظ جميع إعدادات المنصة محلياً بنجاح.";
@@ -1248,7 +1263,8 @@
       "projectName", "zonesCount", "gamePrompt", "curveStrength", "vignetteStrength",
       "fogDensity", "ambientEnergy", "ambientColor", "fogColor", "flickerEnabled",
       "threatSpeed", "batteryDrain", "keycardsReq", "moveSpeed", "maxStamina",
-      "targetFps", "platWin", "platLinux", "platAndroid", "ghOwner", "ghRepo", "ghWorkflow"
+      "targetFps", "platWin", "platLinux", "platAndroid", "ghOwner", "ghRepo",
+      "ghWorkflow", "ghBranch"
     ].forEach((id) => {
       el(id).addEventListener("input", syncUI);
       el(id).addEventListener("change", syncUI);
