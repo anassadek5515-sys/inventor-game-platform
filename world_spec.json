@@ -1,78 +1,114 @@
 {
-  "project_name": "Foggy Lab Escape",
-  "genre": "Horror Survival",
+  "project_name": "Dark Lab",
+  "genre": "Casual",
+  "objective_label": "Survive",
+  "source_prompt": "لعبه تعبان بسيطه",
   "target_platforms": [
+    "Windows",
+    "Linux",
     "Android",
-    "Windows"
+    "Tablet"
   ],
   "performance_profile": {
     "streaming_chunks": true,
     "asset_cache": true,
-    "android_texture_compression": "ETC2",
-    "desktop_packaging": "EXE"
+    "android_texture_compression": "ASTC",
+    "desktop_packaging": "MSI",
+    "target_fps": 60,
+    "dynamic_lod": true
   },
   "atmosphere": {
-    "mood": "Tense",
-    "ambient_light": "Low",
-    "fog": "Dense",
-    "post_processing": "Vignette,ColorGrading"
+    "mood": "dark",
+    "ambient_light": {
+      "color": "#141820",
+      "intensity": 0.22
+    },
+    "fog": {
+      "enabled": true,
+      "color": "#1b222c",
+      "density": 0.044
+    },
+    "post_processing": [
+      "screen_curve",
+      "vignette",
+      "tension_pulse",
+      "sonar_tint"
+    ],
+    "flicker_enabled": true,
+    "screen_curve_strength": 0.35
+  },
+  "gameplay_systems": {
+    "battery_drain_per_sec": 0.1,
+    "battery_pickups_count": 3,
+    "keycards_required": 2,
+    "threat_enabled": true,
+    "threat_speed": 1.5,
+    "tension_sensitivity": 0.7,
+    "stealth_multiplier": 0.5,
+    "sprint_multiplier": 1.2,
+    "sonar_cooldown": 5
+  },
+  "controls_profile": {
+    "pc_mode": {
+      "movement": "WASD/Arrows",
+      "look": "MouseDrag",
+      "sprint": "Shift",
+      "stealth": "C/Ctrl",
+      "light": "F",
+      "sonar": "Q",
+      "reset": "R"
+    },
+    "tablet_mode": {
+      "layout": "split_large_touch",
+      "look": "TouchDrag",
+      "sensitivity": 0.0046
+    },
+    "mobile_mode": {
+      "layout": "compact_thumb_zone",
+      "look": "TouchDrag",
+      "sensitivity": 0.0062
+    },
+    "auto_detect_device": true
   },
   "state_machine": {
-    "initial_state": "Intro",
+    "initial_state": "gameplay",
     "states": [
-      "Exploration",
-      "Puzzle",
-      "Escape",
-      "GameOver"
+      "idle",
+      "exploring",
+      "combat",
+      "stealth"
     ]
   },
   "zones": [
     {
-      "id": "zone_entrance",
-      "type": "lab_section",
-      "grid_snap": 1,
+      "id": "lab1",
+      "type": "lab",
+      "grid_snap": 1.5,
       "assets": [
-        "entrance_door",
-        "flickering_light",
-        "fog_effect"
+        "lab_furniture",
+        "lab_equipment"
       ],
       "triggers": [
-        "door_locked",
-        "light_flicker"
+        "door1"
       ]
     },
     {
-      "id": "zone_hallway",
-      "type": "lab_section",
-      "grid_snap": 1,
+      "id": "lab2",
+      "type": "lab",
+      "grid_snap": 1.5,
       "assets": [
-        "hallway_wall",
-        "flickering_light",
-        "fog_effect"
+        "lab_furniture2"
       ],
       "triggers": [
-        "door_locked",
-        "light_flicker"
-      ]
-    },
-    {
-      "id": "zone_controlroom",
-      "type": "lab_section",
-      "grid_snap": 1,
-      "assets": [
-        "control_panel",
-        "flickering_light",
-        "fog_effect"
-      ],
-      "triggers": [
-        "door_locked",
-        "light_flicker"
+        "door2"
       ]
     }
   ],
   "player": {
-    "controller": "FirstPerson",
-    "spawn_zone": "zone_entrance",
-    "inventory_slots": 3
+    "controller": "keyboard_mouse",
+    "spawn_zone": "lab1",
+    "inventory_slots": 5,
+    "move_speed": 5,
+    "max_stamina": 100
   }
 }
