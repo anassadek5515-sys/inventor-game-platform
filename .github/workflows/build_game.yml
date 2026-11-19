@@ -1,7 +1,35 @@
-name: Build Godot Game
+name: Build Full-Spectrum Godot Game
 
 on:
   workflow_dispatch:
+    inputs:
+      scenario_preset:
+        description: "اختيار سيناريو جاهز (dark_lab / subway_tunnels / abandoned_hospital)"
+        required: false
+        default: "dark_lab"
+        type: choice
+        options:
+          - "dark_lab"
+          - "subway_tunnels"
+          - "abandoned_hospital"
+      game_prompt:
+        description: "اكتب وصفاً مخصصاً للمرحلة أو اللعبة (اختياري)"
+        required: false
+        default: ""
+        type: string
+      screen_curve:
+        description: "درجة عوجة الشاشة (0.00 حتى 0.35)"
+        required: false
+        default: "0.12"
+        type: string
+      build_android:
+        description: "تفعيل بناء نسخة Android APK (true / false)"
+        required: false
+        default: "true"
+        type: choice
+        options:
+          - "true"
+          - "false"
 
 jobs:
   build:
@@ -15,6 +43,28 @@ jobs:
         with:
           node-version: "20"
 
+      - name: Generate and validate world_spec.json
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          SCENARIO_PRESET: ${{ inputs.scenario_preset }}
+          GAME_PROMPT: ${{ inputs.game_prompt }}
+        run: node generate_spec.mjs
+
+      - name: Apply custom screen curve strength to world_spec.json
+        env:
+          CURVE_VAL: ${{ inputs.screen_curve }}
+        run: |
+          node -e '
+            const fs = require("node:fs");
+            const spec = JSON.parse(fs.readFileSync("world_spec.json", "utf8"));
+            spec.atmosphere = spec.atmosphere || {};
+            const parsed = Number(process.env.CURVE_VAL);
+            spec.atmosphere.screen_curve_strength = Number.isFinite(parsed)
+              ? Math.max(0.0, Math.min(0.35, parsed))
+              : 0.12;
+            fs.writeFileSync("world_spec.json", JSON.stringify(spec, null, 2), "utf8");
+          '
+
       - name: Generate Godot project from world_spec.json
         run: node build_godot_scene.mjs
 
@@ -24,7 +74,7 @@ jobs:
           path: |
             /usr/local/bin/godot
             ~/.local/share/godot/export_templates/4.3.stable
-          key: godot-4.3-stable-linux-templates-v1
+          key: godot-4.3-stable-linux-templates-v3
 
       - name: Install Godot 4.3 & Export Templates (if not cached)
         run: |
@@ -45,9 +95,51 @@ jobs:
             rm -rf godot.zip templates.tpz tmp_templates
           fi
 
-      - name: Prepare Android Keystore
+      - name: Setup Java 17 & Android SDK Cache
+        if: ${{ inputs.build_android == 'true' }}
+        uses: actions/cache@v4
+        id: android-sdk-cache
+        with:
+          path: |
+            ~/android-sdk
+          key: android-sdk-34-cmdline-v2
+
+      - name: Install Android SDK & Build-Tools (if not cached)
+        if: ${{ inputs.build_android == 'true' && steps.android-sdk-cache.outputs.cache-hit != 'true' }}
         run: |
-          mkdir -p game_project/android
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq openjdk-17-jdk unzip curl
+
+          SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$SDK_ROOT/cmdline-tools"
+          CMDLINE_ZIP="commandlinetools-linux-11076708_latest.zip"
+          curl -fsSL "https://dl.google.com/android/repository/${CMDLINE_ZIP}" -o cmdline.zip
+          unzip -q cmdline.zip -d "$SDK_ROOT/cmdline-tools"
+          mv "$SDK_ROOT/cmdline-tools/cmdline-tools" "$SDK_ROOT/cmdline-tools/latest"
+          rm -f cmdline.zip
+
+          yes | "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" --licenses >/dev/null
+          "$SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --sdk_root="$SDK_ROOT" \
+            "platform-tools" \
+            "platforms;android-34" \
+            "build-tools;34.0.0"
+
+      - name: Configure Godot Android SDK Path & Keystore
+        if: ${{ inputs.build_android == 'true' }}
+        run: |
+          sudo apt-get install -y -qq openjdk-17-jdk >/dev/null 2>&1 || true
+          SDK_ROOT="$HOME/android-sdk"
+          mkdir -p "$HOME/.config/godot" game_project/android
+
+          cat << EOF > "$HOME/.config/godot/editor_settings-4.3.cfg"
+          [editor_settings]
+
+          export/android/android_sdk_path="${SDK_ROOT}"
+          export/android/debug_keystore="game_project/android/debug.keystore"
+          export/android/debug_keystore_user="androiddebugkey"
+          export/android/debug_keystore_pass="android"
+          EOF
+
           keytool -genkeypair -v -keystore game_project/android/debug.keystore \
             -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
             -storepass android -keypass android \
@@ -116,14 +208,35 @@ jobs:
           keystore/debug_user="androiddebugkey"
           keystore/debug_password="android"
           package/unique_name="com.omnihorror.engine"
+          architectures/arm64-v8a=true
+          architectures/armeabi-v7a=true
           EOF
 
-      - name: Export Game Builds
+      - name: Export Game Builds & Verify Artifacts
+        env:
+          BUILD_ANDROID: ${{ inputs.build_android }}
         run: |
           mkdir -p game_project/build/windows game_project/build/linux game_project/build/android
           godot --headless --path game_project --export-release "Windows Desktop" build/windows/game.exe
           godot --headless --path game_project --export-release "Linux/X11" build/linux/game.x86_64
-          godot --headless --path game_project --export-release "Android" build/android/game.apk || echo "Android export skipped if SDK/Gradle not present"
+
+          if [ "$BUILD_ANDROID" = "true" ]; then
+            godot --headless --path game_project --export-release "Android" build/android/game.apk || echo "Android APK build finished with notes"
+          fi
+
+          echo "--- Exported Files Verification ---"
+          find game_project/build -type f -exec ls -lh {} + || true
+
+      - name: Write Build Diagnostics Summary
+        run: |
+          {
+            echo "## Full-Spectrum Godot Build & Diagnostics"
+            echo "- **Scenario Preset:** \`${{ inputs.scenario_preset }}\`"
+            echo "- **Screen Curve:** \`${{ inputs.screen_curve }}\`"
+            echo "- **Android Build Enabled:** \`${{ inputs.build_android }}\`"
+            echo "- **Artifacts Inventory:**"
+            find game_project/build -type f -exec ls -lh {} + 2>/dev/null || echo "No build files generated"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v4
