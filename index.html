@@ -3,1320 +3,178 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Full-Spectrum Game Engine — لوحة التحكم الشاملة (1000 ميزة)</title>
+  <title>Full-Spectrum Game Engine</title>
   <style>
-    :root {
-      --bg: #070b12;
-      --card: #101724;
-      --card-2: #151f30;
-      --border: #23324b;
-      --text: #e8eff8;
-      --muted: #93a6c2;
-      --accent: #38bdf8;
-      --accent-2: #22c55e;
-      --warn: #f59e0b;
-      --danger: #ef4444;
-      --purple: #a855f7;
-    }
-
-    * {
-      box-sizing: border-box;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
-
     body {
       margin: 0;
-      background: radial-gradient(circle at top right, #132138, var(--bg) 62%);
-      color: var(--text);
-      min-height: 100vh;
-      padding: 18px;
-      line-height: 1.5;
+      padding: 24px;
+      background: #0b1018;
+      color: #eef4fb;
+      font-family: system-ui, -apple-system, sans-serif;
     }
-
-    .app {
-      max-width: 1220px;
+    .box {
+      max-width: 760px;
       margin: 0 auto;
-    }
-
-    .hero {
-      background: linear-gradient(135deg, rgba(16, 23, 36, 0.96), rgba(21, 34, 56, 0.96));
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 20px 22px;
-      margin-bottom: 16px;
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 14px;
-    }
-
-    .hero h1 {
-      margin: 0 0 6px;
-      font-size: 1.45rem;
-      color: #ffffff;
-    }
-
-    .hero p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 0.92rem;
-    }
-
-    .stats-strip {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    .stat-box {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 12px 14px;
-    }
-
-    .stat-label {
-      font-size: 0.78rem;
-      color: var(--muted);
-    }
-
-    .stat-val {
-      font-size: 1.2rem;
-      font-weight: 800;
-      margin-top: 2px;
-      color: var(--accent);
-    }
-
-    .tabs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 16px;
-    }
-
-    .tab-btn {
-      background: var(--card);
-      color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 10px 15px;
-      font-weight: 700;
-      font-size: 0.88rem;
-      cursor: pointer;
-      transition: 0.15s ease;
-    }
-
-    .tab-btn.active {
-      background: var(--accent);
-      color: #051018;
-      border-color: var(--accent);
-    }
-
-    .tab-panel {
-      display: none;
-    }
-
-    .tab-panel.active {
-      display: block;
-    }
-
-    .card {
-      background: var(--card);
-      border: 1px solid var(--border);
+      background: #131b29;
+      border: 1px solid #26354d;
       border-radius: 16px;
-      padding: 18px;
-      margin-bottom: 16px;
+      padding: 22px;
     }
-
-    .card h2 {
-      margin: 0 0 12px;
-      font-size: 1.08rem;
-      color: #f8fafc;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 14px;
-    }
-
-    .grid-3 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-      gap: 12px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 12px;
-    }
-
-    label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 6px;
-      color: #cbd5e1;
-    }
-
+    h1 { margin: 0 0 8px; font-size: 1.35rem; }
+    p { margin: 0 0 18px; color: #9fb1c9; font-size: 0.92rem; }
+    label { display: block; margin: 12px 0 6px; font-weight: 700; font-size: 0.9rem; }
     input, select, textarea {
       width: 100%;
-      background: #090e17;
-      color: var(--text);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 9px 11px;
-      font-size: 0.9rem;
-    }
-
-    textarea {
-      min-height: 92px;
-      resize: vertical;
-    }
-
-    .range-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .range-row input[type="range"] {
-      padding: 0;
-      accent-color: var(--accent);
-    }
-
-    .range-badge {
-      min-width: 56px;
-      text-align: center;
-      background: var(--card-2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      color: var(--accent);
-    }
-
-    .check-inline {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--card-2);
-      border: 1px solid var(--border);
-      border-radius: 10px;
-      padding: 9px 12px;
-      margin-top: 6px;
-    }
-
-    .check-inline input[type="checkbox"] {
-      width: auto;
-      transform: scale(1.15);
-      accent-color: var(--accent-2);
-    }
-
-    .actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 9px;
-      margin-top: 14px;
-    }
-
-    button, a.btn {
-      border: 0;
-      border-radius: 10px;
-      padding: 10px 15px;
-      font-weight: 700;
-      font-size: 0.88rem;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-    }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    .btn-primary { background: var(--accent); color: #05111a; }
-    .btn-success { background: var(--accent-2); color: #05160b; }
-    .btn-warn { background: var(--warn); color: #1a1002; }
-    .btn-purple { background: var(--purple); color: #ffffff; }
-    .btn-secondary {
-      background: var(--card-2);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-
-    .status-bar {
-      margin-top: 10px;
       padding: 10px 12px;
       border-radius: 10px;
-      background: rgba(56, 189, 248, 0.08);
-      border: 1px solid rgba(56, 189, 248, 0.25);
-      color: #bae6fd;
-      font-size: 0.86rem;
-      min-height: 38px;
+      border: 1px solid #2b3c57;
+      background: #0b1018;
+      color: #fff;
+      font-size: 0.92rem;
+      box-sizing: border-box;
     }
-
-    .code-box {
-      background: #06090f;
-      border: 1px solid var(--border);
+    textarea { min-height: 85px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .checks { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+    .checks label { display: inline-flex; align-items: center; gap: 6px; margin: 0; font-weight: 600; }
+    .checks input { width: auto; }
+    .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    button {
+      padding: 11px 18px;
+      border: 0;
+      border-radius: 10px;
+      font-weight: 800;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+    .primary { background: #38bdf8; color: #06131c; }
+    .success { background: #22c55e; color: #05180c; }
+    pre {
+      margin-top: 16px;
+      background: #070b11;
+      border: 1px solid #223047;
       border-radius: 12px;
-      padding: 13px;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      padding: 14px;
+      color: #9ae6ff;
       font-size: 0.8rem;
-      color: #a5f3fc;
-      white-space: pre-wrap;
-      max-height: 340px;
       overflow: auto;
+      max-height: 280px;
       direction: ltr;
       text-align: left;
     }
-
-    .matrix-controls {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 10px;
-      margin-bottom: 14px;
-    }
-
-    .engine-block {
-      background: var(--card-2);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
-    }
-
-    .engine-header {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
-    }
-
-    .engine-title {
-      font-weight: 800;
-      font-size: 0.98rem;
-      color: #ffffff;
-    }
-
-    .pill {
-      font-size: 0.76rem;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(34, 197, 94, 0.14);
-      border: 1px solid rgba(34, 197, 94, 0.35);
-      color: #86efac;
-    }
-
-    .feature-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 8px;
-    }
-
-    .feat-item {
-      background: #0b111c;
-      border: 1px solid #1e2b42;
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 0.82rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 8px;
-    }
-
-    .feat-code {
-      color: var(--accent);
-      font-family: ui-monospace, monospace;
-      font-weight: 700;
-      font-size: 0.76rem;
-      white-space: nowrap;
-    }
-
-    .sim-stage-wrap {
-      position: relative;
-      border-radius: 16px;
-      overflow: hidden;
-      border: 2px solid var(--border);
-      background: #05080d;
-      min-height: 360px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .sim-screen {
-      width: 100%;
-      min-height: 360px;
-      padding: 18px;
-      position: relative;
-      background:
-        radial-gradient(circle at 50% 45%, rgba(56, 189, 248, 0.16), rgba(9, 14, 23, 0.94) 68%),
-        repeating-linear-gradient(
-          0deg,
-          rgba(255, 255, 255, 0.025) 0px,
-          rgba(255, 255, 255, 0.025) 1px,
-          transparent 1px,
-          transparent 3px
-        );
-      transition: transform 0.2s ease, border-radius 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .sim-screen.curved {
-      border-radius: 34px;
-      transform: perspective(900px) rotateX(1.5deg) scale(0.985);
-      box-shadow: inset 0 0 75px rgba(0, 0, 0, 0.85);
-    }
-
-    .sim-hud-top {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 8px;
-      background: rgba(7, 11, 18, 0.78);
-      border: 1px solid rgba(148, 163, 184, 0.25);
-      border-radius: 10px;
-      padding: 8px 12px;
-      font-size: 0.8rem;
-    }
-
-    .sim-center-info {
-      margin: 22px auto;
-      max-width: 560px;
-      text-align: center;
-      background: rgba(16, 23, 36, 0.72);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-    }
-
-    .sim-touch-controls {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: space-between;
-      gap: 12px;
-      margin-top: 14px;
-    }
-
-    .sim-touch-controls.mode-pc {
-      display: none;
-    }
-
-    .sim-touch-controls.mode-mobile .pad-btn {
-      padding: 12px 14px;
-      font-size: 0.95rem;
-    }
-
-    .pad-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      align-items: center;
-    }
-
-    .pad-btn {
-      background: rgba(30, 41, 59, 0.9);
-      color: #f8fafc;
-      border: 1px solid #475569;
-      border-radius: 10px;
-      padding: 9px 12px;
-      font-size: 0.82rem;
-      font-weight: 700;
-      cursor: pointer;
-    }
+    .msg { margin-top: 10px; color: #86efac; font-size: 0.88rem; min-height: 20px; }
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="hero">
+  <div class="box">
+    <h1>Full-Spectrum Game Engine</h1>
+    <p>اضبط مواصفات اللعبة وحمّل <code>world_spec.json</code> مباشرة — ارفعه إلى GitHub ليبدأ البناء تلقائياً بدون توكن.</p>
+
+    <div class="row">
       <div>
-        <h1>Full-Spectrum Game Engine — منصة الألعاب الكاملة</h1>
-        <p>إدارة أول لعبة متفق عليها (DarkLabContainment) + مصفوفة الـ 1000 ميزة + التحكم الثلاثي (PC / Tablet / Mobile) + تشغيل البناء السحابي</p>
+        <label for="projectName">اسم المشروع</label>
+        <input id="projectName" type="text" value="DarkLabContainment" />
       </div>
-      <div class="actions" style="margin-top: 0;">
-        <button class="btn-success" id="btnSaveAll">حفظ الإعدادات</button>
-        <button class="btn-secondary" id="btnResetDefaults">استعادة الافتراضي</button>
-      </div>
-    </div>
-
-    <div class="stats-strip">
-      <div class="stat-box">
-        <div class="stat-label">إجمالي المميزات</div>
-        <div class="stat-val" id="statTotalFeatures">1000</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">المحركات النشطة</div>
-        <div class="stat-val" id="statEngines">10 / 10</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">عوجة الشاشة</div>
-        <div class="stat-val" id="statCurve">0.12</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">وضع التحكم</div>
-        <div class="stat-val" id="statDevice">AUTO</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-label">المنصات المستهدفة</div>
-        <div class="stat-val" id="statPlatforms">4</div>
+      <div>
+        <label for="scenarioPreset">السيناريو</label>
+        <select id="scenarioPreset">
+          <option value="dark_lab" selected>dark_lab</option>
+          <option value="subway_tunnels">subway_tunnels</option>
+          <option value="abandoned_hospital">abandoned_hospital</option>
+        </select>
       </div>
     </div>
 
-    <div class="tabs">
-      <button class="tab-btn active" data-tab="tab-builder">1. إعداد أول لعبة وـ Spec</button>
-      <button class="tab-btn" data-tab="tab-matrix">2. موسوعة الـ 1000 ميزة</button>
-      <button class="tab-btn" data-tab="tab-sim">3. محاكاة التحكم والعوجة</button>
-      <button class="tab-btn" data-tab="tab-cicd">4. تشغيل GitHub Actions والملفات</button>
+    <div class="row">
+      <div>
+        <label for="screenCurve">عوجة الشاشة (0.00 - 0.35)</label>
+        <input id="screenCurve" type="number" step="0.01" min="0" max="0.35" value="0.12" />
+      </div>
+      <div>
+        <label for="zonesCount">عدد المناطق (1 - 6)</label>
+        <input id="zonesCount" type="number" min="1" max="6" value="3" />
+      </div>
     </div>
 
-    <!-- TAB 1: BUILDER & SPEC -->
-    <section class="tab-panel active" id="tab-builder">
-      <div class="card">
-        <h2>العالم، السيناريو، والبرومو الأساسي</h2>
-        <div class="grid-3">
-          <div>
-            <label for="projectName">اسم المشروع</label>
-            <input id="projectName" type="text" value="DarkLabContainment" />
-          </div>
-          <div>
-            <label for="scenarioPreset">السيناريو</label>
-            <select id="scenarioPreset">
-              <option value="dark_lab" selected>مختبر مظلم وضبابي (Dark Lab)</option>
-              <option value="subway_tunnels">أنفاق مترو مظلمة (Subway Tunnels)</option>
-              <option value="abandoned_hospital">مستشفى مهجور (Abandoned Hospital)</option>
-              <option value="custom_sector">قطاع مخصص (Custom Sector)</option>
-            </select>
-          </div>
-          <div>
-            <label for="zonesCount">عدد المناطق (Zones: 1 - 6)</label>
-            <input id="zonesCount" type="number" min="1" max="6" value="3" />
-          </div>
-        </div>
+    <label for="gamePrompt">وصف المرحلة أو اللعبة</label>
+    <textarea id="gamePrompt">لعبة رعب وبقاء في مختبر مظلم وضبابي مع بطاريات وبطاقات وصول ومطاردة وتحكم متكامل.</textarea>
 
-        <div style="margin-top: 12px;">
-          <label for="gamePrompt">وصف اللعبة (Prompt)</label>
-          <textarea id="gamePrompt">لعبة رعب وبقاء ومحاكاة متكاملة في مختبر مظلم وضبابي، تضم جري ولياقة وتسلل صامت، كشاف ببطاريات قابلة للالتقاط، بطاقات وصول لفتح بوابة الأمان والهروب، مطاردة بذكاء اصطناعي يتأثر بالصوت والضوء، نبضة استشعار، عوجة شاشة سينمائية، وتحكم مخصص لكل من الكمبيوتر والتابلت والموبايل.</textarea>
-        </div>
-      </div>
+    <div class="checks">
+      <label><input id="platWin" type="checkbox" checked /> Windows</label>
+      <label><input id="platLinux" type="checkbox" checked /> Linux</label>
+      <label><input id="platAndroid" type="checkbox" checked /> Android APK</label>
+    </div>
 
-      <div class="card">
-        <h2>الشاشة، الإضاءة، الضباب، وعوجة الشاشة</h2>
-        <div class="grid-2">
-          <div>
-            <label for="curveStrength">درجة عوجة الشاشة (Screen Curve)</label>
-            <div class="range-row">
-              <input id="curveStrength" type="range" min="0" max="0.35" step="0.01" value="0.12" />
-              <span class="range-badge" id="curveValText">0.12</span>
-            </div>
-          </div>
-          <div>
-            <label for="vignetteStrength">تظليل الحواف (Vignette)</label>
-            <div class="range-row">
-              <input id="vignetteStrength" type="range" min="0" max="1" step="0.05" value="0.45" />
-              <span class="range-badge" id="vignetteValText">0.45</span>
-            </div>
-          </div>
-          <div>
-            <label for="fogDensity">كثافة الضباب (Fog Density)</label>
-            <div class="range-row">
-              <input id="fogDensity" type="range" min="0.005" max="0.14" step="0.005" value="0.045" />
-              <span class="range-badge" id="fogValText">0.045</span>
-            </div>
-          </div>
-          <div>
-            <label for="ambientEnergy">شدة الإضاءة المحيطية</label>
-            <div class="range-row">
-              <input id="ambientEnergy" type="range" min="0.05" max="1.2" step="0.05" value="0.22" />
-              <span class="range-badge" id="ambientValText">0.22</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid-3" style="margin-top: 10px;">
-          <div>
-            <label for="ambientColor">لون الإضاءة المحيطية</label>
-            <input id="ambientColor" type="color" value="#141820" />
-          </div>
-          <div>
-            <label for="fogColor">لون الضباب</label>
-            <input id="fogColor" type="color" value="#1b222c" />
-          </div>
-          <div class="check-inline">
-            <input id="flickerEnabled" type="checkbox" checked />
-            <label for="flickerEnabled" style="margin: 0;">وميض إضاءة الممرات (Flicker)</label>
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <h2>أسلوب اللعب، المطاردة، البطارية، والبطاقات</h2>
-        <div class="grid-3">
-          <div>
-            <label for="threatSpeed">سرعة المطارِد (Stalker Speed)</label>
-            <input id="threatSpeed" type="number" step="0.1" min="0.5" max="6" value="2.35" />
-          </div>
-          <div>
-            <label for="batteryDrain">استهلاك البطارية / ثانية</label>
-            <input id="batteryDrain" type="number" step="0.05" min="0.1" max="4" value="0.62" />
-          </div>
-          <div>
-            <label for="keycardsReq">بطاقات الوصول المطلوبة</label>
-            <input id="keycardsReq" type="number" min="1" max="6" value="3" />
-          </div>
-          <div>
-            <label for="moveSpeed">سرعة حركة اللاعب</label>
-            <input id="moveSpeed" type="number" step="0.1" min="2.5" max="10" value="5.2" />
-          </div>
-          <div>
-            <label for="maxStamina">اللياقة القصوى (Stamina)</label>
-            <input id="maxStamina" type="number" step="5" min="40" max="200" value="100" />
-          </div>
-          <div>
-            <label for="targetFps">الفريمات المستهدفة (Target FPS)</label>
-            <input id="targetFps" type="number" step="10" min="30" max="144" value="60" />
-          </div>
-        </div>
-
-        <div class="grid-3" style="margin-top: 10px;">
-          <div class="check-inline">
-            <input id="platWin" type="checkbox" checked />
-            <label for="platWin" style="margin: 0;">Windows</label>
-          </div>
-          <div class="check-inline">
-            <input id="platLinux" type="checkbox" checked />
-            <label for="platLinux" style="margin: 0;">Linux</label>
-          </div>
-          <div class="check-inline">
-            <input id="platAndroid" type="checkbox" checked />
-            <label for="platAndroid" style="margin: 0;">Android APK + Tablet</label>
-          </div>
-        </div>
-
-        <div class="actions">
-          <button class="btn-primary" id="btnRefreshSpec">تحديث world_spec.json</button>
-          <button class="btn-success" id="btnCopyJson">نسخ JSON</button>
-          <button class="btn-secondary" id="btnDownloadJson">تحميل world_spec.json</button>
-        </div>
-        <div class="status-bar" id="builderStatus">جاهز لتوليد مخطط أول لعبة متفق عليها.</div>
-      </div>
-
-      <div class="card">
-        <h2>معاينة world_spec.json الكامل</h2>
-        <div class="code-box" id="specPreview"></div>
-      </div>
-    </section>
-
-    <!-- TAB 2: 1000 FEATURE MATRIX -->
-    <section class="tab-panel" id="tab-matrix">
-      <div class="card">
-        <h2>موسوعة الـ 1000 ميزة (10 محركات رئيسية × 100 ميزة)</h2>
-        <div class="matrix-controls">
-          <div>
-            <label for="featureSearch">بحث في المميزات (رقم أو كلمة)</label>
-            <input id="featureSearch" type="text" placeholder="مثال: #0336 أو عوجة أو مطاردة أو بطارية أو لمس..." />
-          </div>
-          <div>
-            <label for="engineFilter">فلترة حسب المحرك</label>
-            <select id="engineFilter">
-              <option value="ALL">كل المحركات (1000 ميزة)</option>
-            </select>
-          </div>
-        </div>
-        <div id="matrixSummary" style="color: var(--muted); font-size: 0.85rem; margin-bottom: 10px;"></div>
-        <div id="matrixContainer"></div>
-      </div>
-    </section>
-
-    <!-- TAB 3: LIVE INTERACTIVE SIMULATOR -->
-    <section class="tab-panel" id="tab-sim">
-      <div class="card">
-        <h2>محاكاة حية لعوجة الشاشة وأوضاع التحكم الثلاثة (PC / Tablet / Mobile)</h2>
-        <div class="actions" style="margin-top: 0; margin-bottom: 12px;">
-          <button class="btn-primary" id="simModeAuto">اكتشاف تلقائي</button>
-          <button class="btn-secondary" id="simModePc">وضع PC / Laptop</button>
-          <button class="btn-secondary" id="simModeTablet">وضع Tablet</button>
-          <button class="btn-secondary" id="simModeMobile">وضع Mobile</button>
-          <button class="btn-warn" id="simToggleLight">تبديل الكشاف (F)</button>
-          <button class="btn-purple" id="simSonar">نبضة Sonar (Q)</button>
-          <button class="btn-secondary" id="simTensionUp">رفع التوتر +15%</button>
-          <button class="btn-secondary" id="simReset">إعادة ضبط (R)</button>
-        </div>
-
-        <div class="sim-stage-wrap">
-          <div class="sim-screen curved" id="simScreen">
-            <div class="sim-hud-top">
-              <span id="simHudMode">MODE: AUTO</span>
-              <span id="simHudBat">BATTERY: 100% (ON)</span>
-              <span id="simHudStam">STAMINA: 100%</span>
-              <span id="simHudTension">TENSION: 20%</span>
-              <span id="simHudPos">POS: (0.0, 4.0)</span>
-            </div>
-
-            <div class="sim-center-info">
-              <div style="font-weight: 800; font-size: 1.05rem; margin-bottom: 6px;" id="simTitle">DarkLabContainment</div>
-              <div style="color: var(--muted); font-size: 0.88rem;" id="simDesc">
-                اختبر تأثير عوجة الشاشة، التوتر، البطارية، وحركة الأزرار قبل تشغيل بناء Godot السحابي.
-              </div>
-            </div>
-
-            <div class="sim-touch-controls" id="simTouchControls">
-              <div class="pad-group">
-                <button class="pad-btn" data-move="up">▲ W</button>
-                <button class="pad-btn" data-move="down">▼ S</button>
-                <button class="pad-btn" data-move="left">◀ A</button>
-                <button class="pad-btn" data-move="right">▶ D</button>
-              </div>
-              <div class="pad-group">
-                <button class="pad-btn" id="padSprint">Sprint</button>
-                <button class="pad-btn" id="padStealth">Stealth</button>
-                <button class="pad-btn" id="padLight">Light</button>
-                <button class="pad-btn" id="padSonar">Sonar</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- TAB 4: GITHUB ACTIONS & DEPLOYMENT -->
-    <section class="tab-panel" id="tab-cicd">
-      <div class="card">
-        <h2>توليد اللعبة عبر GitHub Actions مباشرة وتوليد أوامر التشغيل</h2>
-        <div class="grid-4">
-          <div>
-            <label for="ghOwner">اسم المستخدم / المنظمة (GitHub Owner)</label>
-            <input id="ghOwner" type="text" placeholder="anassadeK5515-sys" />
-          </div>
-          <div>
-            <label for="ghRepo">اسم المستودع (GitHub Repo)</label>
-            <input id="ghRepo" type="text" placeholder="inventor-game-platform" />
-          </div>
-          <div>
-            <label for="ghWorkflow">اسم ملف الـ Workflow</label>
-            <input id="ghWorkflow" type="text" value="build_game.yml" />
-          </div>
-          <div>
-            <label for="ghBranch">الفرع (Branch)</label>
-            <input id="ghBranch" type="text" value="main" />
-          </div>
-        </div>
-
-        <div style="margin-top: 12px;">
-          <label for="ghToken">GitHub Fine-Grained Token (صلاحية Actions: Read & Write)</label>
-          <input id="ghToken" type="password" placeholder="github_pat_..." />
-        </div>
-
-        <div class="actions">
-          <button class="btn-success" id="btnTriggerWorkflow">توليد اللعبة الآن عبر GitHub Actions</button>
-          <a class="btn btn-primary" id="btnDirectActionsUrl" href="https://github.com" target="_blank" rel="noopener">فتح صفحة Actions في GitHub</a>
-          <button class="btn-secondary" id="btnCopyCli">نسخ أمر GitHub CLI</button>
-        </div>
-        <div class="status-bar" id="cicdStatus">أدخل Owner و Repo واسم ملف الـ Workflow والـ Token لتوليد اللعبة مباشرة.</div>
-      </div>
-
-      <div class="card">
-        <h2>أمر التشغيل السريع (GitHub CLI)</h2>
-        <div class="code-box" id="cliCommandBox"></div>
-      </div>
-    </section>
+    <div class="btns">
+      <button class="primary" id="btnGenerate">توليد وتحميل world_spec.json</button>
+      <button class="success" id="btnCopy">نسخ JSON</button>
+    </div>
+    <div class="msg" id="msg"></div>
+    <pre id="preview"></pre>
   </div>
 
   <script>
-    const ENGINES = [
-      { id: "E1", name: "العالم والمناطق والبيئة", range: "#0001–#0100", base: 1, items: [
-        "توليد مناطق متتابعة (Zones) بأطوال وعروض مختلفة",
-        "ممرات ضيقة وغرف فحص وقاعات مظلمة وتقاطعات",
-        "خامات PBR متباينة للأرضيات والحوائط والأسقف",
-        "إعدادات roughness وmetallic وemission واقعية",
-        "ضباب جوي (Fog) بكثافة ولون متغير حسب الأجواء",
-        "إضاءة محيطية منخفضة وميض لمبات الممرات (Flicker)",
-        "عوائق وتصادمات حقيقية (Collision) وصناديق وأعمدة",
-        "بوابة أمان متحركة تفتح بعد جمع بطاقات الوصول"
-      ]},
-      { id: "E2", name: "الكشاف والطاقة والبطاريات", range: "#0101–#0200", base: 101, items: [
-        "كشاف يدوي (SpotLight3D) بتشغيل/إطفاء فوري",
-        "استهلاك تدريجي للطاقة عند تشغيل الكشاف",
-        "بطاريات قابلة للالتقاط (Battery Pickups) تشحن الطاقة",
-        "تحذيرات انخفاض البطارية ومزامنة فورية مع HUD",
-        "استهلاك طاقة عند إطلاق نبضة الاستشعار (Sonar)",
-        "إعادة تعبئة كاملة للبطارية عند إعادة تشغيل المرحلة"
-      ]},
-      { id: "E3", name: "المطاردة والتوتر والرعب النفسي", range: "#0201–#0300", base: 201, items: [
-        "كيان مطاردة (Stalker AI) يتبع اللاعب حسب القرب",
-        "حواس مزدوجة: يكتشف الجري وضوء الكشاف لمسافة أبعد",
-        "تهدئة الاكتشاف عند التسلل الصامت وإطفاء الكشاف",
-        "مقياس توتر (Tension %) يتصاعد مع الاقتراب والخطر",
-        "حالات الجلسة الكاملة: Gameplay / Escaped / Caught"
-      ]},
-      { id: "E4", name: "الكاميرا والشاشة والـ Shaders", range: "#0301–#0400", base: 301, items: [
-        "عوجة شاشة سينمائية (Curved CRT / Barrel Shader)",
-        "تظليل حواف (Vignette) ينبض مع مستوى التوتر",
-        "وميض بصري عند إطلاق نبضة الاستشعار (Sonar Flash)",
-        "دوران حر بالكاميرا بالماوس أو السحب باللمس",
-        "اهتزاز حركة الرأس (Head Bob) مع المشي والجري والتسلل"
-      ]},
-      { id: "E5", name: "التحكم الهجين والواجهة والـ HUD", range: "#0401–#0500", base: 401, items: [
-        "اكتشاف تلقائي لنوع الجهاز + تبديل يدوي (PC / Tablet / Mobile)",
-        "وضع PC: إخفاء أزرار اللمس وتحكم كامل بالكيبورد والماوس",
-        "وضع Tablet: توزيع لمس مريح على الأطراف وسحب واسع للنظر",
-        "وضع Mobile: أزرار مكبرة في منطقة الإبهام وحساسية سحب أعلى",
-        "شريط حالة مباشر يعرض البطارية واللياقة والتوتر والـ FPS"
-      ]},
-      { id: "E6", name: "المهام والأبواب والمفاتيح والمنطق", range: "#0501–#0600", base: 501, items: [
-        "جمع بطاقات الوصول (Keycards) لفتح بوابة الأمان",
-        "تحديث نص الهدف تلقائياً عند فتح البوابة أو قفلها",
-        "عداد مرات النجاة (Escapes) وإعادة ضبط فورية (R / Reset)"
-      ]},
-      { id: "E7", name: "الصوت والنبض والمؤثرات الحسية", range: "#0601–#0700", base: 601, items: [
-        "مولّد صوت برمجي حي (AudioStreamGenerator) بدون ملفات خارجية",
-        "أصوات خطوات مختلفة للمشي والجري وتوقفها في التسلل",
-        "نبضات قلب إيقاعية تسرّع مع ارتفاع التوتر",
-        "أصوات التقاط البطاريات والبطاقات والـ Sonar وزر Mute (M)"
-      ]},
-      { id: "E8", name: "الأداء والذاكرة والـ Cache", range: "#0701–#0800", base: 701, items: [
-        "تخزين مؤقت (GitHub Actions Cache) لـ Godot 4.3 وTemplates",
-        "تخزين مؤقت لـ Android SDK وBuild-Tools لتسريع البناء",
-        "مراقبة فريمات (FPS) حية وإعدادات ظلال وMSAA متوازنة"
-      ]},
-      { id: "E9", name: "مولّد المخطط الذكي (World Spec)", range: "#0801–#0900", base: 801, items: [
-        "تحويل الوصف النصي والسيناريو إلى world_spec.json منظم",
-        "طبقة تحقق وFallback آمنة تمنع سقوط البناء عند نقص البيانات",
-        "تصدير ونسخ ومزامنة المخطط مباشرة من لوحة التحكم"
-      ]},
-      { id: "E10", name: "الأتمتة السحابية والتصدير متعدد المنصات", range: "#0901–#1000", base: 901, items: [
-        "تصدير نسخ Windows وLinux وAndroid APK في خط أنابيب واحد",
-        "توليد debug.keystore تلقائياً وتهيئة إعدادات الأندرويد",
-        "تقرير تشخيص المخرجات ورفع حزم البناء في Artifacts"
-      ]}
-    ];
+    const $ = (id) => document.getElementById(id);
 
-    function build1000Features() {
-      const list = [];
-      ENGINES.forEach((eng) => {
-        for (let i = 0; i < 100; i++) {
-          const num = eng.base + i;
-          const code = `#${String(num).padStart(4, "0")}`;
-          const desc = eng.items[i % eng.items.length];
-          list.push({
-            code,
-            engineId: eng.id,
-            engineName: eng.name,
-            title: `${desc} (تفصيل ${i + 1})`,
-            enabled: true
-          });
-        }
-      });
-      return list;
-    }
+    function makeSpec() {
+      const scenario = $("scenarioPreset").value;
+      const count = Math.max(1, Math.min(6, Number($("zonesCount").value) || 3));
+      const curve = Math.max(0, Math.min(0.35, Number($("screenCurve").value) || 0.12));
+      const platforms = [];
+      if ($("platWin").checked) platforms.push("Windows");
+      if ($("platLinux").checked) platforms.push("Linux");
+      if ($("platAndroid").checked) platforms.push("Android");
 
-    const ALL_FEATURES = build1000Features();
-    const STORAGE_KEY = "full_spectrum_engine_state_v1";
-
-    const PRESET_MAP = {
-      dark_lab: {
-        project_name: "DarkLabContainment",
-        mood: "clinical_dread",
-        ambientColor: "#141820",
-        ambientEnergy: 0.22,
-        fogColor: "#1b222c",
-        fogDensity: 0.044,
-        curveStrength: 0.12,
-        threatSpeed: 2.35,
-        batteryDrain: 0.62,
-        prompt: "لعبة رعب وبقاء ومحاكاة متكاملة في مختبر مظلم وضبابي، تضم جري ولياقة وتسلل صامت، كشاف ببطاريات قابلة للالتقاط، بطاقات وصول لفتح بوابة الأمان والهروب، مطاردة بذكاء اصطناعي يتأثر بالصوت والضوء، نبضة استشعار، عوجة شاشة سينمائية، وتحكم مخصص لكل من الكمبيوتر والتابلت والموبايل."
-      },
-      subway_tunnels: {
-        project_name: "SubwayAbyssSurvival",
-        mood: "claustrophobic_shadow",
-        ambientColor: "#11161d",
-        ambientEnergy: 0.18,
-        fogColor: "#161d26",
-        fogDensity: 0.055,
-        curveStrength: 0.14,
-        threatSpeed: 2.65,
-        batteryDrain: 0.72,
-        prompt: "لعبة رعب وبقاء في أنفاق مترو مظلمة تحت الأرض، ضباب كثيف ومطاردة سريعة وبطاريات وبطاقات وصول وعوجة شاشة وتحكم للموبايل والتابلت والكمبيوتر."
-      },
-      abandoned_hospital: {
-        project_name: "WardZeroEcho",
-        mood: "paranoid_isolation",
-        ambientColor: "#17191f",
-        ambientEnergy: 0.25,
-        fogColor: "#20252e",
-        fogDensity: 0.038,
-        curveStrength: 0.11,
-        threatSpeed: 2.2,
-        batteryDrain: 0.58,
-        prompt: "لعبة رعب وبقاء وتسلل في مستشفى مهجور، إضاءة متقطعة وبطاقات وصول وبطاريات وعوجة شاشة وأوضاع تحكم متكاملة."
-      },
-      custom_sector: {
-        project_name: "CustomHorrorSector",
-        mood: "adaptive_dread",
-        ambientColor: "#141820",
-        ambientEnergy: 0.22,
-        fogColor: "#1b222c",
-        fogDensity: 0.045,
-        curveStrength: 0.12,
-        threatSpeed: 2.35,
-        batteryDrain: 0.62,
-        prompt: ""
-      }
-    };
-
-    const el = (id) => document.getElementById(id);
-
-    document.querySelectorAll(".tab-btn").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
-        document.querySelectorAll(".tab-panel").forEach((p) => p.classList.remove("active"));
-        btn.classList.add("active");
-        el(btn.dataset.tab).classList.add("active");
-      });
-    });
-
-    function getPlatforms() {
-      const list = [];
-      if (el("platWin").checked) list.push("Windows");
-      if (el("platLinux").checked) list.push("Linux");
-      if (el("platAndroid").checked) list.push("Android", "Tablet");
-      return list.length ? list : ["Windows", "Linux"];
-    }
-
-    function buildZones(count, scenario) {
-      const n = Math.max(1, Math.min(6, Number(count) || 3));
-      const arr = [];
-      for (let i = 0; i < n; i++) {
-        arr.push({
-          id: `zone_${String(i + 1).padStart(2, "0")}_${scenario}`,
-          type: i === 0 ? "entry_hall" : (i === n - 1 ? "containment_wing" : "research_corridor"),
-          grid_snap: Number((2.0 + i * 0.2).toFixed(2)),
-          assets: ["crate", "pillar", "light"],
-          triggers: i === n - 1 ? [`keycard_${i + 1}`, "exit_gate"] : [`keycard_${i + 1}`]
-        });
-      }
-      return arr;
-    }
-
-    function buildSpec() {
-      const scenario = el("scenarioPreset").value;
-      const p = PRESET_MAP[scenario] || PRESET_MAP.dark_lab;
-      const zones = buildZones(el("zonesCount").value, scenario);
-      const platforms = getPlatforms();
-      const curve = Number(el("curveStrength").value);
-      const vignette = Number(el("vignetteStrength").value);
-      const fogDensity = Number(el("fogDensity").value);
-      const ambientEnergy = Number(el("ambientEnergy").value);
-      const reqKeys = Math.min(zones.length, Math.max(1, Number(el("keycardsReq").value) || zones.length));
+      const zones = Array.from({ length: count }, (_, i) => ({
+        id: `zone_${String(i + 1).padStart(2, "0")}_${scenario}`,
+        type: i === 0 ? "entry_hall" : (i === count - 1 ? "containment_wing" : "research_corridor"),
+        triggers: i === count - 1 ? [`keycard_${i + 1}`, "exit_gate"] : [`keycard_${i + 1}`]
+      }));
 
       return {
-        project_name: (el("projectName").value || p.project_name).trim(),
-        genre: "horror_survival_simulation",
-        objective_label: "Collect keycards, unlock security gate, and escape",
-        source_prompt: el("gamePrompt").value.trim(),
-        target_platforms: platforms,
-        performance_profile: {
-          streaming_chunks: true,
-          asset_cache: true,
-          android_texture_compression: "etc2_astc",
-          desktop_packaging: "standalone_executable",
-          target_fps: Number(el("targetFps").value) || 60,
-          dynamic_lod: true
-        },
+        project_name: ($("projectName").value || "DarkLabContainment").trim(),
+        scenario_preset: scenario,
+        source_prompt: $("gamePrompt").value.trim(),
+        target_platforms: platforms.length ? platforms : ["Windows", "Linux"],
         atmosphere: {
-          mood: p.mood,
-          ambient_light: {
-            color: el("ambientColor").value,
-            intensity: ambientEnergy
-          },
-          fog: {
-            enabled: true,
-            color: el("fogColor").value,
-            density: fogDensity
-          },
-          post_processing: ["screen_curve", "vignette", "tension_pulse", "sonar_tint"],
-          flicker_enabled: Boolean(el("flickerEnabled").checked),
           screen_curve_strength: curve,
-          vignette_strength: vignette
+          fog_enabled: true,
+          flicker_enabled: true
         },
-        gameplay_systems: {
-          battery_drain_per_sec: Number(el("batteryDrain").value) || 0.62,
-          battery_pickups_count: zones.length,
-          keycards_required: reqKeys,
-          threat_enabled: true,
-          threat_speed: Number(el("threatSpeed").value) || 2.35,
-          tension_sensitivity: 1.0,
-          stealth_multiplier: 0.55,
-          sprint_multiplier: 1.55,
-          sonar_cooldown: 2.0
-        },
-        controls_profile: {
-          pc_mode: { movement: "WASD/Arrows", look: "MouseDrag", sprint: "Shift", stealth: "C/Ctrl", light: "F", sonar: "Q", reset: "R" },
-          tablet_mode: { layout: "split_large_touch", look: "TouchDrag", sensitivity: 0.0046 },
-          mobile_mode: { layout: "compact_thumb_zone", look: "TouchDrag", sensitivity: 0.0062 },
-          auto_detect_device: true
-        },
-        state_machine: {
-          initial_state: "gameplay",
-          states: ["gameplay", "escaped", "caught"]
-        },
-        zones,
-        player: {
-          controller: "first_person_hybrid",
-          spawn_zone: zones[0].id,
-          inventory_slots: 6,
-          move_speed: Number(el("moveSpeed").value) || 5.2,
-          max_stamina: Number(el("maxStamina").value) || 100
-        }
+        zones
       };
     }
 
-    function syncUI() {
-      const curve = Number(el("curveStrength").value).toFixed(2);
-      const vig = Number(el("vignetteStrength").value).toFixed(2);
-      const fog = Number(el("fogDensity").value).toFixed(3);
-      const amb = Number(el("ambientEnergy").value).toFixed(2);
-
-      el("curveValText").textContent = curve;
-      el("vignetteValText").textContent = vig;
-      el("fogValText").textContent = fog;
-      el("ambientValText").textContent = amb;
-      el("statCurve").textContent = curve;
-      el("statPlatforms").textContent = String(getPlatforms().length);
-
-      const spec = buildSpec();
-      el("specPreview").textContent = JSON.stringify(spec, null, 2);
-      el("simTitle").textContent = spec.project_name;
-      updateCiCdBox(spec);
-      applySimVisuals();
+    function updatePreview() {
+      $("preview").textContent = JSON.stringify(makeSpec(), null, 2);
     }
 
-    const engineFilterEl = el("engineFilter");
-    ENGINES.forEach((e) => {
-      const opt = document.createElement("option");
-      opt.value = e.id;
-      opt.textContent = `${e.name} (${e.range})`;
-      engineFilterEl.appendChild(opt);
-    });
-
-    function renderMatrix() {
-      const q = el("featureSearch").value.trim().toLowerCase();
-      const engFilter = engineFilterEl.value;
-      const container = el("matrixContainer");
-      container.innerHTML = "";
-
-      let shownCount = 0;
-
-      ENGINES.forEach((eng) => {
-        if (engFilter !== "ALL" && engFilter !== eng.id) return;
-        const matching = ALL_FEATURES.filter((f) => {
-          if (f.engineId !== eng.id) return false;
-          if (!q) return true;
-          return (
-            f.code.toLowerCase().includes(q) ||
-            f.title.toLowerCase().includes(q) ||
-            f.engineName.toLowerCase().includes(q)
-          );
-        });
-
-        if (!matching.length) return;
-        shownCount += matching.length;
-
-        const block = document.createElement("div");
-        block.className = "engine-block";
-        block.innerHTML = `
-          <div class="engine-header">
-            <div class="engine-title">${eng.name} <span style="color:var(--muted);font-weight:500;font-size:0.82rem;">(${eng.range})</span></div>
-            <span class="pill">${matching.length} ميزة</span>
-          </div>
-          <div class="feature-list">
-            ${matching.map((f) => `
-              <div class="feat-item">
-                <span>${f.title}</span>
-                <span class="feat-code">${f.code}</span>
-              </div>
-            `).join("")}
-          </div>
-        `;
-        container.appendChild(block);
-      });
-
-      el("matrixSummary").textContent = `المعروض حالياً: ${shownCount} من أصل 1000 ميزة.`;
-    }
-
-    let simMode = "AUTO";
-    let simBat = 100;
-    let simStam = 100;
-    let simTension = 20;
-    let simLightOn = true;
-    let simX = 0;
-    let simZ = 4;
-
-    function resolveDeviceMode() {
-      if (simMode !== "AUTO") return simMode;
-      const isTouch = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-      if (!isTouch) return "PC";
-      return Math.max(window.innerWidth, window.innerHeight) >= 900 ? "TABLET" : "MOBILE";
-    }
-
-    function applySimVisuals() {
-      const mode = resolveDeviceMode();
-      const curve = Number(el("curveStrength").value);
-      const screen = el("simScreen");
-      const touch = el("simTouchControls");
-
-      if (curve > 0.01) {
-        screen.classList.add("curved");
-        screen.style.borderRadius = `${Math.round(16 + curve * 140)}px`;
-      } else {
-        screen.classList.remove("curved");
-        screen.style.borderRadius = "14px";
-      }
-
-      touch.className = "sim-touch-controls";
-      if (mode === "PC") touch.classList.add("mode-pc");
-      if (mode === "MOBILE") touch.classList.add("mode-mobile");
-
-      el("statDevice").textContent = mode;
-      el("simHudMode").textContent = `MODE: ${mode} (${simMode})`;
-      el("simHudBat").textContent = `BATTERY: ${Math.round(simBat)}% (${simLightOn ? "ON" : "OFF"})`;
-      el("simHudStam").textContent = `STAMINA: ${Math.round(simStam)}%`;
-      el("simHudTension").textContent = `TENSION: ${Math.round(simTension)}%`;
-      el("simHudPos").textContent = `POS: (${simX.toFixed(1)}, ${simZ.toFixed(1)})`;
-    }
-
-    function moveSim(dir) {
-      const step = 0.6;
-      if (dir === "up") simZ -= step;
-      if (dir === "down") simZ += step;
-      if (dir === "left") simX -= step;
-      if (dir === "right") simX += step;
-      if (simLightOn && simBat > 0) simBat = Math.max(0, simBat - 1.2);
-      simStam = Math.max(10, simStam - 2);
-      applySimVisuals();
-    }
-
-    el("simModeAuto").addEventListener("click", () => { simMode = "AUTO"; applySimVisuals(); });
-    el("simModePc").addEventListener("click", () => { simMode = "PC"; applySimVisuals(); });
-    el("simModeTablet").addEventListener("click", () => { simMode = "TABLET"; applySimVisuals(); });
-    el("simModeMobile").addEventListener("click", () => { simMode = "MOBILE"; applySimVisuals(); });
-    el("simToggleLight").addEventListener("click", () => { simLightOn = !simLightOn; applySimVisuals(); });
-    el("padLight").addEventListener("click", () => { simLightOn = !simLightOn; applySimVisuals(); });
-    el("simSonar").addEventListener("click", () => { simBat = Math.max(0, simBat - 8); simTension = Math.min(100, simTension + 8); applySimVisuals(); });
-    el("padSonar").addEventListener("click", () => { simBat = Math.max(0, simBat - 8); simTension = Math.min(100, simTension + 8); applySimVisuals(); });
-    el("simTensionUp").addEventListener("click", () => { simTension = Math.min(100, simTension + 15); applySimVisuals(); });
-    el("simReset").addEventListener("click", () => {
-      simBat = 100; simStam = 100; simTension = 20; simLightOn = true; simX = 0; simZ = 4;
-      applySimVisuals();
-    });
-
-    document.querySelectorAll("[data-move]").forEach((b) => {
-      b.addEventListener("click", () => moveSim(b.dataset.move));
-    });
-
-    function updateCiCdBox(spec) {
-      const owner = el("ghOwner").value.trim() || "<OWNER>";
-      const repo = el("ghRepo").value.trim() || "<REPO>";
-      const wf = el("ghWorkflow").value.trim() || "build_game.yml";
-      const branch = el("ghBranch").value.trim() || "main";
-      const preset = el("scenarioPreset").value;
-      const curve = el("curveStrength").value;
-      const buildAndroid = el("platAndroid").checked ? "true" : "false";
-      const promptClean = (el("gamePrompt").value || "").replace(/"/g, '\\"').replace(/\n/g, " ");
-
-      el("btnDirectActionsUrl").href =
-        owner !== "<OWNER>" && repo !== "<REPO>"
-          ? `https://github.com/${owner}/${repo}/actions`
-          : "https://github.com";
-
-      el("cliCommandBox").textContent =
-`gh workflow run ${wf} --repo ${owner}/${repo} --ref ${branch} \\
-  -f scenario_preset="${preset === "custom_sector" ? "dark_lab" : preset}" \\
-  -f game_prompt="${promptClean}" \\
-  -f screen_curve="${curve}" \\
-  -f build_android="${buildAndroid}"`;
-    }
-
-    el("btnTriggerWorkflow").addEventListener("click", async () => {
-      const owner = el("ghOwner").value.trim();
-      const repo = el("ghRepo").value.trim();
-      const wf = el("ghWorkflow").value.trim() || "build_game.yml";
-      const branch = el("ghBranch").value.trim() || "main";
-      const token = el("ghToken").value.trim();
-
-      if (!owner || !repo || !token) {
-        el("cicdStatus").textContent = "يرجى إدخال GitHub Owner و Repo و Token لتوليد اللعبة مباشرة.";
-        return;
-      }
-
-      const presetVal = el("scenarioPreset").value;
-      const inputs = {
-        scenario_preset: presetVal === "custom_sector" ? "dark_lab" : presetVal,
-        game_prompt: el("gamePrompt").value.trim(),
-        screen_curve: String(el("curveStrength").value),
-        build_android: el("platAndroid").checked ? "true" : "false"
-      };
-
-      const btn = el("btnTriggerWorkflow");
-      btn.disabled = true;
-      el("cicdStatus").textContent = "جاري إرسال أمر توليد اللعبة إلى GitHub Actions...";
-
-      try {
-        const res = await fetch(
-          `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/actions/workflows/${encodeURIComponent(wf)}/dispatches`,
-          {
-            method: "POST",
-            headers: {
-              "Authorization": `Bearer ${token}`,
-              "Accept": "application/vnd.github+json",
-              "X-GitHub-Api-Version": "2022-11-28",
-              "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ ref: branch, inputs })
-          }
-        );
-
-        if (res.status === 204) {
-          el("cicdStatus").textContent = "تم إرسال أمر توليد اللعبة بنجاح! افتح صفحة Actions في GitHub لمتابعة البناء وتحميل Artifacts.";
-        } else {
-          const errData = await res.json().catch(() => ({}));
-          el("cicdStatus").textContent = `تعذر التشغيل (${res.status}): ${errData.message || "تحقق من اسم الملف، الفرع، وصلاحيات التوكن (Actions: Read & Write)"}`;
-        }
-      } catch (err) {
-        el("cicdStatus").textContent = `خطأ في الاتصال بـ GitHub API: ${err.message}`;
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    function saveState() {
-      const state = {
-        projectName: el("projectName").value,
-        scenarioPreset: el("scenarioPreset").value,
-        zonesCount: el("zonesCount").value,
-        gamePrompt: el("gamePrompt").value,
-        curveStrength: el("curveStrength").value,
-        vignetteStrength: el("vignetteStrength").value,
-        fogDensity: el("fogDensity").value,
-        ambientEnergy: el("ambientEnergy").value,
-        ambientColor: el("ambientColor").value,
-        fogColor: el("fogColor").value,
-        flickerEnabled: el("flickerEnabled").checked,
-        threatSpeed: el("threatSpeed").value,
-        batteryDrain: el("batteryDrain").value,
-        keycardsReq: el("keycardsReq").value,
-        moveSpeed: el("moveSpeed").value,
-        maxStamina: el("maxStamina").value,
-        targetFps: el("targetFps").value,
-        platWin: el("platWin").checked,
-        platLinux: el("platLinux").checked,
-        platAndroid: el("platAndroid").checked,
-        ghOwner: el("ghOwner").value,
-        ghRepo: el("ghRepo").value,
-        ghWorkflow: el("ghWorkflow").value,
-        ghBranch: el("ghBranch").value
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      el("builderStatus").textContent = "تم حفظ جميع إعدادات المنصة محلياً بنجاح.";
-    }
-
-    function loadState() {
-      try {
-        const raw = localStorage.getItem(STORAGE_KEY);
-        if (!raw) return;
-        const s = JSON.parse(raw);
-        Object.keys(s).forEach((k) => {
-          if (!el(k)) return;
-          if (typeof s[k] === "boolean") el(k).checked = s[k];
-          else el(k).value = s[k];
-        });
-      } catch {}
-    }
-
-    el("scenarioPreset").addEventListener("change", () => {
-      const p = PRESET_MAP[el("scenarioPreset").value];
-      if (p && el("scenarioPreset").value !== "custom_sector") {
-        el("projectName").value = p.project_name;
-        el("ambientColor").value = p.ambientColor;
-        el("ambientEnergy").value = p.ambientEnergy;
-        el("fogColor").value = p.fogColor;
-        el("fogDensity").value = p.fogDensity;
-        el("curveStrength").value = p.curveStrength;
-        el("threatSpeed").value = p.threatSpeed;
-        el("batteryDrain").value = p.batteryDrain;
-        if (p.prompt) el("gamePrompt").value = p.prompt;
-      }
-      syncUI();
-    });
-
-    [
-      "projectName", "zonesCount", "gamePrompt", "curveStrength", "vignetteStrength",
-      "fogDensity", "ambientEnergy", "ambientColor", "fogColor", "flickerEnabled",
-      "threatSpeed", "batteryDrain", "keycardsReq", "moveSpeed", "maxStamina",
-      "targetFps", "platWin", "platLinux", "platAndroid", "ghOwner", "ghRepo",
-      "ghWorkflow", "ghBranch"
-    ].forEach((id) => {
-      el(id).addEventListener("input", syncUI);
-      el(id).addEventListener("change", syncUI);
-    });
-
-    el("btnRefreshSpec").addEventListener("click", () => {
-      syncUI();
-      el("builderStatus").textContent = "تم تحديث world_spec.json وفق أحدث الإعدادات.";
-    });
-
-    el("btnCopyJson").addEventListener("click", async () => {
-      try {
-        await navigator.clipboard.writeText(el("specPreview").textContent);
-        el("builderStatus").textContent = "تم نسخ world_spec.json إلى الحافظة.";
-      } catch {
-        el("builderStatus").textContent = "تعذر النسخ التلقائي؛ يمكنك نسخ النص من المعاينة مباشرة.";
-      }
-    });
-
-    el("btnDownloadJson").addEventListener("click", () => {
-      const blob = new Blob([el("specPreview").textContent], { type: "application/json" });
+    $("btnGenerate").addEventListener("click", () => {
+      const text = JSON.stringify(makeSpec(), null, 2);
+      $("preview").textContent = text;
+      const blob = new Blob([text], { type: "application/json" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
       a.download = "world_spec.json";
       a.click();
       URL.revokeObjectURL(url);
-      el("builderStatus").textContent = "تم تحميل ملف world_spec.json.";
+      $("msg").textContent = "تم تحميل world_spec.json — ارفعه إلى المستودع ليبدأ البناء تلقائياً.";
     });
 
-    el("btnCopyCli").addEventListener("click", async () => {
+    $("btnCopy").addEventListener("click", async () => {
       try {
-        await navigator.clipboard.writeText(el("cliCommandBox").textContent);
-        el("cicdStatus").textContent = "تم نسخ أمر التشغيل إلى الحافظة.";
+        await navigator.clipboard.writeText($("preview").textContent);
+        $("msg").textContent = "تم نسخ JSON.";
       } catch {
-        el("cicdStatus").textContent = "تعذر النسخ التلقائي.";
+        $("msg").textContent = "انسخ النص مباشرة من المربع بالأسفل.";
       }
     });
 
-    el("btnSaveAll").addEventListener("click", saveState);
-    el("btnResetDefaults").addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEY);
-      location.reload();
-    });
+    ["projectName", "scenarioPreset", "screenCurve", "zonesCount", "gamePrompt", "platWin", "platLinux", "platAndroid"]
+      .forEach((id) => $(id).addEventListener("input", updatePreview));
 
-    el("featureSearch").addEventListener("input", renderMatrix);
-    engineFilterEl.addEventListener("change", renderMatrix);
-
-    loadState();
-    syncUI();
-    renderMatrix();
-    applySimVisuals();
+    updatePreview();
   </script>
 </body>
 </html>
