@@ -1,0 +1,38 @@
+name: Generate World Spec
+
+on:
+  workflow_dispatch:
+    inputs:
+      game_prompt:
+        description: "اكتب فكرة أو برومو اللعبة هنا"
+        required: true
+        default: "لعبة رعب وبقاء في مختبر مظلم وضبابي، اللاعب معاه كشاف ببطارية، فيه أبواب مقفولة وإضاءة بتقطع، بأداء سلس لأندرويد وويندوز."
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run World Spec Generator
+        env:
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+          GAME_PROMPT: ${{ inputs.game_prompt }}
+        run: node generate_spec.mjs
+
+      - name: Commit generated world_spec.json
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add world_spec.json
+          git diff --staged --quiet || git commit -m "chore: generate world_spec.json"
+          git push
