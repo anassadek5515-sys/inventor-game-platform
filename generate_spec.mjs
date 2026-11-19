@@ -1,16 +1,19 @@
 import fs from "node:fs";
 
 const SYSTEM_PROMPT = `
-أنت وكيل تخطيط ألعاب محترف. حوّل وصف المستخدم إلى كائن JSON صالح فقط بدون أي نص إضافي أو شرح.
-يجب أن يضم الحقول التالية:
+أنت مهندس معماري ومخطط ألعاب AAA محترف. حوّل وصف المستخدم إلى كائن JSON صالح فقط بدون أي نص إضافي أو شرح.
+يجب أن يضم الحقول التالية بدقة:
 - project_name (string)
 - genre (string)
-- target_platforms (array of strings)
-- performance_profile (object: streaming_chunks, asset_cache, android_texture_compression, desktop_packaging)
-- atmosphere (object: mood, ambient_light, fog, post_processing)
+- objective_label (string)
+- target_platforms (array of strings: ["Windows", "Linux", "Android", "Tablet"])
+- performance_profile (object: streaming_chunks, asset_cache, android_texture_compression, desktop_packaging, target_fps, dynamic_lod)
+- atmosphere (object: mood, ambient_light, fog, post_processing, flicker_enabled, screen_curve_strength)
+- gameplay_systems (object: battery_drain_per_sec, battery_pickups_count, keycards_required, threat_enabled, threat_speed, tension_sensitivity, stealth_multiplier, sprint_multiplier, sonar_cooldown)
+- controls_profile (object: pc_mode, tablet_mode, mobile_mode, auto_detect_device)
 - state_machine (object: initial_state, states)
 - zones (array of objects: id, type, grid_snap, assets, triggers)
-- player (object: controller, spawn_zone, inventory_slots)
+- player (object: controller, spawn_zone, inventory_slots, move_speed, max_stamina)
 `;
 
 async function getKeyModels(apiKey) {
@@ -75,12 +78,12 @@ export async function buildWorldSpec(promptText, apiKey = process.env.GROQ_API_K
 if (import.meta.url === `file://${process.argv[1]}`) {
   const promptText =
     process.env.GAME_PROMPT ||
-    "لعبة رعب وبقاء في مختبر مظلم وضبابي، اللاعب معاه كشاف ببطارية، فيه أبواب مقفولة وإضاءة بتقطع، ومطلوب تصديرها لأندرويد وويندوز بأداء سلس.";
+    "لعبة رعب وبقاء ومحاكاة متكاملة في منشأة أبحاث ضخمة مظلمة وضبابية، تضم جري ولياقة وتسلل صامت، كشاف ببطاريات قابلة للالتقاط، بطاقات وصول لفتح المخرج، مطاردة بذكاء اصطناعي يتأثر بالصوت والضوء، نبضة استشعار، عوجة شاشة سينمائية، وتحكم مخصص لكل من الكمبيوتر والتابلت والموبايل.";
 
   buildWorldSpec(promptText)
     .then((spec) => {
       fs.writeFileSync("world_spec.json", JSON.stringify(spec, null, 2), "utf8");
-      console.log("تم توليد وحفظ world_spec.json بنجاح.");
+      console.log("تم توليد وحفظ world_spec.json الشامل بنجاح.");
     })
     .catch((err) => {
       console.error(err.message);
