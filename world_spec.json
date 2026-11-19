@@ -1,0 +1,78 @@
+{
+  "project_name": "Foggy Lab Escape",
+  "genre": "Horror Survival",
+  "target_platforms": [
+    "Android",
+    "Windows"
+  ],
+  "performance_profile": {
+    "streaming_chunks": true,
+    "asset_cache": true,
+    "android_texture_compression": "ETC2",
+    "desktop_packaging": "EXE"
+  },
+  "atmosphere": {
+    "mood": "Tense",
+    "ambient_light": "Low",
+    "fog": "Dense",
+    "post_processing": "Vignette,ColorGrading"
+  },
+  "state_machine": {
+    "initial_state": "Intro",
+    "states": [
+      "Exploration",
+      "Puzzle",
+      "Escape",
+      "GameOver"
+    ]
+  },
+  "zones": [
+    {
+      "id": "zone_entrance",
+      "type": "lab_section",
+      "grid_snap": 1,
+      "assets": [
+        "entrance_door",
+        "flickering_light",
+        "fog_effect"
+      ],
+      "triggers": [
+        "door_locked",
+        "light_flicker"
+      ]
+    },
+    {
+      "id": "zone_hallway",
+      "type": "lab_section",
+      "grid_snap": 1,
+      "assets": [
+        "hallway_wall",
+        "flickering_light",
+        "fog_effect"
+      ],
+      "triggers": [
+        "door_locked",
+        "light_flicker"
+      ]
+    },
+    {
+      "id": "zone_controlroom",
+      "type": "lab_section",
+      "grid_snap": 1,
+      "assets": [
+        "control_panel",
+        "flickering_light",
+        "fog_effect"
+      ],
+      "triggers": [
+        "door_locked",
+        "light_flicker"
+      ]
+    }
+  ],
+  "player": {
+    "controller": "FirstPerson",
+    "spawn_zone": "zone_entrance",
+    "inventory_slots": 3
+  }
+}
